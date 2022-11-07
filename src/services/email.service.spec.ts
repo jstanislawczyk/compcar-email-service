@@ -6,7 +6,8 @@ import {EmailService} from './email.service';
 import nodemailer from 'nodemailer';
 import config from 'config';
 import {EmailSendingFailureError} from '../models/errors/email-sending-failure.error';
-import {email} from '../../test/fixtures/email.fixture';
+import {Email} from '../models/common/email';
+import {EmailBuilder} from '../../test/utils/builders/email.builder';
 
 use(sinonChai);
 use(chaiAsPromised);
@@ -38,6 +39,9 @@ context('EmailService', () => {
 
   describe('sendMail', () => {
     it('should send mail', async () => {
+      // Arrange
+      const email: Email = new EmailBuilder().build();
+
       // Act
       await emailService.sendMail(email);
 
@@ -52,6 +56,9 @@ context('EmailService', () => {
     });
 
     it('should throw error', async () => {
+      // Arrange
+      const email: Email = new EmailBuilder().build();
+
       // Arrange
       sendMailStub.rejects(new Error('EmailSendingError'));
 
