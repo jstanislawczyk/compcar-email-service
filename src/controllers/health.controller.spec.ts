@@ -7,7 +7,9 @@ describe('HealthController', () => {
 
   let healthController: HealthController;
 
-  beforeEach(() => healthController = new HealthController());
+  beforeEach(() =>
+    healthController = new HealthController()
+  );
 
   describe('getApplicationHealth', () => {
     it(`should return application health status=${HealthStatus.OK}`, () => {
