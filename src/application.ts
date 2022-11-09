@@ -1,10 +1,13 @@
+// Always keep as a first import
 import 'reflect-metadata';
+
 import config from 'config';
 import util from 'util';
 import {Server} from 'http';
-import {createExpressServer} from 'routing-controllers';
+import {createExpressServer, useContainer} from 'routing-controllers';
 import {Logger} from './common/logger';
 import {ServerAddressInfo} from './models/common/server-address-info';
+import Container from 'typedi';
 
 export class Application {
 
@@ -12,6 +15,8 @@ export class Application {
   public serverAddress: string;
 
   public async bootstrap(): Promise<void> {
+    useContainer(Container);
+
     const app: Server = createExpressServer({
       controllers: [
         `${__dirname}/controllers/*.controller.{js,ts}`,
@@ -34,6 +39,7 @@ export class Application {
     await util.promisify(this.server.close);
 
     Logger.log('Server closed');
+    process.exit(0);
   }
 
   private buildServerAddress(serverAddressInfo: ServerAddressInfo): string {

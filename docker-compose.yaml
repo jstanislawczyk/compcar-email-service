@@ -1,0 +1,27 @@
+version: "3.9"
+
+networks:
+  compcar:
+    name: compcar
+
+services:
+  mailhog:
+    image: 'mailhog/mailhog'
+    ports:
+      - '8025:8025'
+      - '1025:1025'
+
+  car-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 3002:3002
+    depends_on:
+      - mailhog
+    networks:
+      compcar:
+        aliases:
+          - email-service
