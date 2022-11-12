@@ -1,11 +1,11 @@
 import sinon, {SinonSandbox} from 'sinon';
-import request from 'supertest';
 import {application} from '../hooks/application-hook';
 import {expect} from 'chai';
-import axios from 'axios';
-import config from 'config';
 import {EmailDto} from '../../src/models/dto/email.dto';
 import {EmailDtoBuilder} from '../utils/builders/email-dto.builder';
+import axios from 'axios';
+import config from 'config';
+import request from 'supertest';
 
 describe('Email', () => {
 

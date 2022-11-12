@@ -69,7 +69,11 @@ describe('/email', () => {
       await request(application.serverAddress)
         .post('/email')
         .send(emailDto)
-        .expect(500);
+        .expect(500, {
+          httpCode: 500,
+          message: `Failed to send an email to ${emailDto.receiverAddress} address`,
+          value: 'EmailSendingFailureError',
+        });
     });
   });
 });

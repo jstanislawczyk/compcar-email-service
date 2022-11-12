@@ -15,12 +15,14 @@ export class Application {
   public serverAddress: string;
 
   public async bootstrap(): Promise<void> {
-    useContainer(Container);
-
     const app: Server = createExpressServer({
       controllers: [
         `${__dirname}/controllers/*.controller.{js,ts}`,
       ],
+      middlewares: [
+        `${__dirname}/middlewares/*.middleware.{js,ts}`,
+      ],
+      defaultErrorHandler: false,
     });
     const port: number = config.get('server.port');
     const url: number = config.get('server.url');
@@ -28,6 +30,7 @@ export class Application {
 
     Logger.log(`Starting server on port=${port}`);
 
+    useContainer(Container);
     this.server = await this.startServer(app, url, port);
 
     Logger.log(`Server started ${protocol}://${this.serverAddress}`);

@@ -1,10 +1,13 @@
-export class EmailSendingFailureError extends Error {
+import {HttpError} from 'routing-controllers';
+
+export class EmailSendingFailureError extends HttpError {
+
+  private readonly value: string;
 
   constructor(message: string) {
-    super(message);
+    super(500, message);
 
-    Object.defineProperty(this, 'name', {
-      value: 'EmailSendingFailureError',
-    });
+    this.value = 'EmailSendingFailureError';
+    Object.setPrototypeOf(this, EmailSendingFailureError.prototype);
   }
 }
