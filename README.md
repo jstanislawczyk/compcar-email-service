@@ -4,7 +4,6 @@ Service for handling emails sending
 ## Technologies used
 * Node 16
 * Typescript
-* TypeORM
 * ClassValidator
 * Mocha + Sinon + Chai
 * SuperTest
