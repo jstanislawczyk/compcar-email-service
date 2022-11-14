@@ -9,4 +9,9 @@ export class EmailDtoBuilder extends Builder<EmailDto> {
 
     super(emailDto);
   }
+
+  public withReceiverAddress(receiverAddress: string): EmailDtoBuilder {
+    this.entity.receiverAddress = receiverAddress;
+    return this;
+  }
 }

@@ -4,17 +4,17 @@ export abstract class EmailDto {
 
   @IsString()
   @IsNotEmpty()
-  public readonly receiverAddress: string;
+  public receiverAddress: string;
 
   @IsString()
   @IsNotEmpty()
-  public readonly subject: string;
+  public subject: string;
 
   @IsString()
   @IsNotEmpty()
-  public readonly html: string;
+  public html: string;
 
   @IsString()
   @IsNotEmpty()
-  public readonly text: string;
+  public text: string;
 }

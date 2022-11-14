@@ -2,12 +2,10 @@ import {HttpError} from 'routing-controllers';
 
 export class EmailSendingFailureError extends HttpError {
 
-  private readonly value: string;
+  public readonly value: string = 'EmailSendingFailureError';
 
   constructor(message: string) {
     super(500, message);
-
-    this.value = 'EmailSendingFailureError';
     Object.setPrototypeOf(this, EmailSendingFailureError.prototype);
   }
 }
