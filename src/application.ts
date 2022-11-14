@@ -8,6 +8,9 @@ import {createExpressServer, useContainer} from 'routing-controllers';
 import {Logger} from './common/logger';
 import {ServerAddressInfo} from './models/common/server-address-info';
 import Container from 'typedi';
+import {Consumer, SQSMessage} from 'sqs-consumer';
+import {LoggerLevel} from './models/enums/logger-level';
+import {EmailMessageHandler} from './handlers/email-message.handler';
 
 export class Application {
 
@@ -15,6 +18,22 @@ export class Application {
   public serverAddress: string;
 
   public async bootstrap(): Promise<void> {
+    await Promise.all([
+      this.bootstrapHttpServer(),
+      this.bootstrapSqsQueue(),
+    ]);
+  }
+
+  public async close(): Promise<void> {
+    Logger.log('Closing server');
+
+    await util.promisify(this.server.close);
+
+    Logger.log('Server closed');
+    process.exit(0);
+  }
+
+  private async bootstrapHttpServer(): Promise<void> {
     const app: Server = createExpressServer({
       controllers: [
         `${__dirname}/controllers/*.controller.{js,ts}`,
@@ -36,15 +55,6 @@ export class Application {
     Logger.log(`Server started ${protocol}://${this.serverAddress}`);
   }
 
-  public async close(): Promise<void> {
-    Logger.log('Closing server');
-
-    await util.promisify(this.server.close);
-
-    Logger.log('Server closed');
-    process.exit(0);
-  }
-
   private buildServerAddress(serverAddressInfo: ServerAddressInfo): string {
     return `${serverAddressInfo.address}:${serverAddressInfo.port}`;
   }
@@ -56,5 +66,31 @@ export class Application {
         resolve(server);
       });
     });
+  }
+
+  private async bootstrapSqsQueue(): Promise<void> {
+    Logger.log('SQS Consumer starting');
+
+    const queueUrl: string = config.get('aws.sqs.emailQueueUrl');
+    const emailMessageHandler: EmailMessageHandler = Container.get(EmailMessageHandler);
+    const consumer: Consumer = Consumer.create({
+      queueUrl,
+      handleMessage: async (sqsMessage: SQSMessage) => {
+        Logger.log(`Received email sqs message: ${sqsMessage}`);
+        await emailMessageHandler.handleEmailMessage(sqsMessage);
+      },
+    });
+
+    consumer.on('error', (error: Error) =>
+      Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
+    );
+
+    consumer.on('processing_error', (error: Error) =>
+      Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
+    );
+
+    consumer.start();
+
+    Logger.log('SQS Consumer started');
   }
 }
