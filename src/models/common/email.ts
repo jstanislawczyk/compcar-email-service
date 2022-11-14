@@ -1,6 +1,6 @@
-export abstract class Email {
+export class Email {
 
-  protected constructor(
+  constructor(
     public readonly receiverAddress: string,
     public readonly subject: string,
     public readonly html: string,

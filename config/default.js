@@ -8,6 +8,11 @@ module.exports = {
         isDev: process.env.IS_DEV === 'true',
         environment: process.env.ENVIRONMENT || 'local',
     },
+    aws: {
+        sqs: {
+            emailQueueUrl: process.env.EMAIL_QUEUE_URL || 'localhost',
+        },
+    },
     email: {
         host: process.env.EMAIL_HOST || 'localhost',
         port: {
