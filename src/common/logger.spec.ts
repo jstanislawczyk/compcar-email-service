@@ -25,11 +25,14 @@ context('Logger', () => {
       // Arrange
       const message: string = 'Log message';
 
+      (Logger as any).logger = undefined;
+
       // Act
       Logger.log(message);
 
       // Assert
       expect(initLoggerSpy).to.be.calledOnce;
+      expect((Logger as any).logger).not.to.be.undefined;
     });
 
     it('should not init logger if it is already setup', () => {

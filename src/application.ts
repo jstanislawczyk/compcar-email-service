@@ -18,10 +18,8 @@ export class Application {
   public serverAddress: string;
 
   public async bootstrap(): Promise<void> {
-    await Promise.all([
-      this.bootstrapHttpServer(),
-      this.bootstrapSqsQueue(),
-    ]);
+    await this.bootstrapHttpServer();
+    await this.bootstrapSqsQueue();
   }
 
   public async close(): Promise<void> {
@@ -87,6 +85,10 @@ export class Application {
 
     consumer.on('processing_error', (error: Error) =>
       Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
+    );
+
+    consumer.on('stopped', () =>
+      Logger.log('SQS Consumer stopped')
     );
 
     consumer.start();
