@@ -43,14 +43,16 @@ describe('EmailMessageHandler', () => {
         Body: JSON.stringify(emailDto),
       };
 
-      emailDtoConverterStub.toModelFromSqsMessage.returns(email);
+      emailDtoConverterStub.toDtoFromSqsMessage.returns(emailDto);
+      emailDtoConverterStub.toModel.returns(email);
       emailServiceStub.sendMail.resolves();
 
       // Act
       await emailMessageHandler.handleEmailMessage(sqsMessage);
 
       // Assert
-      expect(emailDtoConverterStub.toModelFromSqsMessage).to.be.calledOnceWith(sqsMessage);
+      expect(emailDtoConverterStub.toDtoFromSqsMessage).to.be.calledOnceWith(sqsMessage);
+      expect(emailDtoConverterStub.toModel).to.be.calledOnceWith(emailDto);
       expect(emailServiceStub.sendMail).to.be.calledOnceWith(email);
     });
 
@@ -63,7 +65,8 @@ describe('EmailMessageHandler', () => {
       };
       const errorMessage: string = 'EmailService error';
 
-      emailDtoConverterStub.toModelFromSqsMessage.returns(email);
+      emailDtoConverterStub.toDtoFromSqsMessage.returns(emailDto);
+      emailDtoConverterStub.toModel.returns(email);
       emailServiceStub.sendMail.rejects(new Error(errorMessage));
 
       // Act
@@ -73,7 +76,8 @@ describe('EmailMessageHandler', () => {
       await expect(result).to.be.eventually
         .rejectedWith(errorMessage)
         .and.be.instanceOf(Error);
-      expect(emailDtoConverterStub.toModelFromSqsMessage).to.be.calledOnce;
+      expect(emailDtoConverterStub.toDtoFromSqsMessage).to.be.calledOnce;
+      expect(emailDtoConverterStub.toModel).to.be.calledOnce;
       expect(emailServiceStub.sendMail).to.be.calledOnce;
     });
   });

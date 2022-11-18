@@ -70,11 +70,11 @@ export class Application {
     Logger.log('SQS Consumer starting');
 
     const queueUrl: string = config.get('aws.sqs.emailQueueUrl');
-    const emailMessageHandler: EmailMessageHandler = Container.get(EmailMessageHandler);
     const consumer: Consumer = Consumer.create({
       queueUrl,
       handleMessage: async (sqsMessage: SQSMessage) => {
         Logger.log(`Received email sqs message: ${sqsMessage}`);
+        const emailMessageHandler: EmailMessageHandler = Container.get(EmailMessageHandler);
         await emailMessageHandler.handleEmailMessage(sqsMessage);
       },
     });

@@ -17,7 +17,7 @@ export class EmailDtoConverter {
     };
   }
 
-  public toModelFromSqsMessage(sqsMessage: SQSMessage): Email | undefined {
+  public toDtoFromSqsMessage(sqsMessage: SQSMessage): EmailDto | undefined {
     if (sqsMessage.Body === undefined) {
       return undefined;
     }
@@ -36,11 +36,11 @@ export class EmailDtoConverter {
 
     const emailDto: EmailDto = plainToClass(EmailDto, parsedBody);
 
-    return {
+    return plainToClass(EmailDto, {
       receiverAddress: emailDto.receiverAddress,
       subject: emailDto.subject,
       html: emailDto.html,
       text: emailDto.text,
-    };
+    });
   }
 }

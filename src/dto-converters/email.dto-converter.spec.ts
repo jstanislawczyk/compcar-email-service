@@ -31,7 +31,7 @@ describe('EmailDtoConverter', () => {
     });
   });
 
-  describe('toModelFromSqsMessage', () => {
+  describe('toDtoFromSqsMessage', () => {
     it('should transform to email model', () => {
       // Arrange
       const emailDto: EmailDto = new EmailDtoBuilder().build();
@@ -40,10 +40,10 @@ describe('EmailDtoConverter', () => {
       };
 
       // Act
-      const email: Email | undefined = emailDtoConverter.toModelFromSqsMessage(sqsMessage);
+      const returnedEmailDto: EmailDto | undefined = emailDtoConverter.toDtoFromSqsMessage(sqsMessage);
 
       // Assert
-      expect(email).to.eql({
+      expect(returnedEmailDto).to.eql({
         receiverAddress: emailDto.receiverAddress,
         subject: emailDto.subject,
         html: emailDto.html,
@@ -61,10 +61,10 @@ describe('EmailDtoConverter', () => {
         };
 
         // Act
-        const email: Email | undefined = emailDtoConverter.toModelFromSqsMessage(sqsMessage);
+        const emailDto: EmailDto | undefined = emailDtoConverter.toDtoFromSqsMessage(sqsMessage);
 
         // Assert
-        expect(email).to.eql({
+        expect(emailDto).to.eql({
           receiverAddress: undefined,
           subject: undefined,
           html: undefined,
@@ -79,10 +79,10 @@ describe('EmailDtoConverter', () => {
         };
 
         // Act
-        const email: Email | undefined = emailDtoConverter.toModelFromSqsMessage(sqsMessage);
+        const emailDto: EmailDto | undefined = emailDtoConverter.toDtoFromSqsMessage(sqsMessage);
 
         // Assert
-        expect(email).to.eql({
+        expect(emailDto).to.eql({
           receiverAddress: undefined,
           subject: undefined,
           html: undefined,
@@ -94,10 +94,10 @@ describe('EmailDtoConverter', () => {
     describe("shouldn't transform to email model if sqs message body", () => {
       it('is undefined', () => {
         // Act
-        const email: Email | undefined = emailDtoConverter.toModelFromSqsMessage({});
+        const emailDto: EmailDto | undefined = emailDtoConverter.toDtoFromSqsMessage({});
 
         // Assert
-        expect(email).to.be.undefined;
+        expect(emailDto).to.be.undefined;
       });
 
       it('is number', () => {
@@ -107,10 +107,10 @@ describe('EmailDtoConverter', () => {
         };
 
         // Act
-        const email: Email | undefined = emailDtoConverter.toModelFromSqsMessage(sqsMessage);
+        const emailDto: EmailDto | undefined = emailDtoConverter.toDtoFromSqsMessage(sqsMessage);
 
         // Assert
-        expect(email).to.be.undefined;
+        expect(emailDto).to.be.undefined;
       });
 
       it('is string', () => {
@@ -120,10 +120,10 @@ describe('EmailDtoConverter', () => {
         };
 
         // Act
-        const email: Email | undefined = emailDtoConverter.toModelFromSqsMessage(sqsMessage);
+        const emailDto: EmailDto | undefined = emailDtoConverter.toDtoFromSqsMessage(sqsMessage);
 
         // Assert
-        expect(email).to.be.undefined;
+        expect(emailDto).to.be.undefined;
       });
 
       it('is empty string', () => {
@@ -133,10 +133,10 @@ describe('EmailDtoConverter', () => {
         };
 
         // Act
-        const email: Email | undefined = emailDtoConverter.toModelFromSqsMessage(sqsMessage);
+        const emailDto: EmailDto | undefined = emailDtoConverter.toDtoFromSqsMessage(sqsMessage);
 
         // Assert
-        expect(email).to.be.undefined;
+        expect(emailDto).to.be.undefined;
       });
 
       it('if sqs message body is empty array', () => {
@@ -146,10 +146,10 @@ describe('EmailDtoConverter', () => {
         };
 
         // Act
-        const email: Email | undefined = emailDtoConverter.toModelFromSqsMessage(sqsMessage);
+        const emailDto: EmailDto | undefined = emailDtoConverter.toDtoFromSqsMessage(sqsMessage);
 
         // Assert
-        expect(email).to.be.undefined;
+        expect(emailDto).to.be.undefined;
       });
 
       it('if sqs message body is array of emails', () => {
@@ -160,10 +160,10 @@ describe('EmailDtoConverter', () => {
         };
 
         // Act
-        const email: Email | undefined = emailDtoConverter.toModelFromSqsMessage(sqsMessage);
+        const returnedEmailDto: EmailDto | undefined = emailDtoConverter.toDtoFromSqsMessage(sqsMessage);
 
         // Assert
-        expect(email).to.be.undefined;
+        expect(returnedEmailDto).to.be.undefined;
       });
     });
   });
