@@ -9,8 +9,13 @@ module.exports = {
         environment: process.env.ENVIRONMENT || 'local',
     },
     aws: {
+        region: process.env.AWS_REGION || 'us-east-1',
+        endpoint: process.env.AWS_ENDPOINT || '',
         sqs: {
-            emailQueueUrl: process.env.EMAIL_QUEUE_URL || 'localhost',
+            emailQueue: {
+                name: process.env.EMAIL_QUEUE_URL || 'emails',
+                url: process.env.EMAIL_QUEUE_URL || 'http://localhost:4566/000000000000/emails',
+            },
         },
     },
     email: {

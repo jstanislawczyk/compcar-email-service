@@ -8,9 +8,10 @@ import {createExpressServer, useContainer} from 'routing-controllers';
 import {Logger} from './common/logger';
 import {ServerAddressInfo} from './models/common/server-address-info';
 import Container from 'typedi';
-import {Consumer, SQSMessage} from 'sqs-consumer';
+import {Consumer, ConsumerOptions, SQSMessage} from 'sqs-consumer';
 import {LoggerLevel} from './models/enums/logger-level';
 import {EmailMessageHandler} from './handlers/email-message.handler';
+import {SQS} from 'aws-sdk';
 
 export class Application {
 
@@ -28,7 +29,6 @@ export class Application {
     await util.promisify(this.server.close);
 
     Logger.log('Server closed');
-    process.exit(0);
   }
 
   private async bootstrapHttpServer(): Promise<void> {
@@ -67,17 +67,12 @@ export class Application {
   }
 
   private async bootstrapSqsQueue(): Promise<void> {
-    Logger.log('SQS Consumer starting');
+    const queueUrl: string = config.get('aws.sqs.emailQueue.url');
+    const consumerOptions: ConsumerOptions = this.getSqsConsumerOptions(queueUrl);
 
-    const queueUrl: string = config.get('aws.sqs.emailQueueUrl');
-    const consumer: Consumer = Consumer.create({
-      queueUrl,
-      handleMessage: async (sqsMessage: SQSMessage) => {
-        Logger.log(`Received email sqs message: ${sqsMessage}`);
-        const emailMessageHandler: EmailMessageHandler = Container.get(EmailMessageHandler);
-        await emailMessageHandler.handleEmailMessage(sqsMessage);
-      },
-    });
+    Logger.log(`SQS Consumer starting. URL: ${queueUrl}`);
+
+    const consumer: Consumer = Consumer.create(consumerOptions);
 
     consumer.on('error', (error: Error) =>
       Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
@@ -94,5 +89,29 @@ export class Application {
     consumer.start();
 
     Logger.log('SQS Consumer started');
+  }
+
+  private getSqsConsumerOptions(queueUrl: string): ConsumerOptions {
+    const consumerOptions: ConsumerOptions = {
+      queueUrl,
+      handleMessage: async (sqsMessage: SQSMessage) => {
+        Logger.log(`Received email sqs message: ${JSON.stringify(sqsMessage)}`);
+        const emailMessageHandler: EmailMessageHandler = Container.get(EmailMessageHandler);
+        await emailMessageHandler.handleEmailMessage(sqsMessage);
+      },
+    };
+
+    const awsEndpoint: string = config.get('aws.endpoint');
+
+    if (awsEndpoint) {
+      // Used in tests to make requests to Localstack
+      Logger.log(`Using custom AWS endpoint: ${awsEndpoint}`);
+
+      consumerOptions.sqs = new SQS({
+        endpoint: config.get('aws.endpoint'),
+      });
+    }
+
+    return consumerOptions;
   }
 }

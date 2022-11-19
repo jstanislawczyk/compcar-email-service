@@ -1,5 +1,5 @@
 import {Application} from './application';
-import sinon, {SinonSandbox, SinonSpy, SinonStub, SinonStubbedInstance} from 'sinon';
+import sinon, {SinonSandbox, SinonStub, SinonStubbedInstance} from 'sinon';
 import {Consumer} from 'sqs-consumer';
 import {expect, use} from 'chai';
 import sinonChai from 'sinon-chai';
@@ -54,7 +54,7 @@ describe('Application', () => {
       await application.bootstrap();
 
       // Assert
-      const expectedSqsUrl: string = config.get('aws.sqs.emailQueueUrl');
+      const expectedSqsUrl: string = config.get('aws.sqs.emailQueue.url');
 
       expect(sqsConsumerCreateStub).to.be.calledOnce;
       expect(sqsConsumerCreateStub.firstCall.firstArg.queueUrl).to.be.eql(expectedSqsUrl);
