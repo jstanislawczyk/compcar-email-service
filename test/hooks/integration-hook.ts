@@ -13,6 +13,11 @@ before(async () => {
   });
   sqs = new SQS({
     endpoint: config.get('aws.endpoint'),
+    region: config.get('aws.region'),
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'defaultAccessKey',
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'defaultSecretAccessKey',
+    },
   });
 
   await createQueue();
