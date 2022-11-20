@@ -20,6 +20,10 @@ jobs:
         ports:
           - 1025:1025
           - 8025:8025
+      localstack:
+        image: localstack/localstack-light
+        ports:
+          - 4566:4566
 
     steps:
     - uses: actions/checkout@v2
