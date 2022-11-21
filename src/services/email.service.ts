@@ -47,7 +47,7 @@ export class EmailService {
       await EmailService.mailTransporter.sendMail(mailOptions);
       Logger.log(`Email has been sent to ${email.receiverAddress} address`);
     } catch (error: any) {
-      Logger.log(`Failed to send an email to ${email.receiverAddress} address. Reason: ${error.response}`);
+      Logger.log(`Failed to send an email to ${email.receiverAddress} address. Reason: ${error}`);
       throw new EmailSendingFailureError(`Failed to send an email to ${email.receiverAddress} address`);
     }
   }

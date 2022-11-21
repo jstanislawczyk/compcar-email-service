@@ -1,5 +1,5 @@
 import sinon, {SinonSandbox} from 'sinon';
-import {application} from '../hooks/application-hook';
+import {application} from '../hooks/integration-hook';
 import {expect} from 'chai';
 import {EmailDto} from '../../src/models/dto/email.dto';
 import {EmailDtoBuilder} from '../utils/builders/email-dto.builder';
@@ -7,7 +7,7 @@ import axios from 'axios';
 import config from 'config';
 import request from 'supertest';
 
-describe('Email', () => {
+describe('EmailAPI', () => {
 
   const emailHost: string = config.get('email.host');
   const emailPort: number = config.get('email.port.http');

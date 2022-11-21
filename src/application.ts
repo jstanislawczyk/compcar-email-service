@@ -8,6 +8,10 @@ import {createExpressServer, useContainer} from 'routing-controllers';
 import {Logger} from './common/logger';
 import {ServerAddressInfo} from './models/common/server-address-info';
 import Container from 'typedi';
+import {Consumer, ConsumerOptions, SQSMessage} from 'sqs-consumer';
+import {LoggerLevel} from './models/enums/logger-level';
+import {EmailMessageHandler} from './handlers/email-message.handler';
+import {SQS} from 'aws-sdk';
 
 export class Application {
 
@@ -15,6 +19,19 @@ export class Application {
   public serverAddress: string;
 
   public async bootstrap(): Promise<void> {
+    await this.bootstrapHttpServer();
+    await this.bootstrapSqsQueue();
+  }
+
+  public async close(): Promise<void> {
+    Logger.log('Closing server');
+
+    await util.promisify(this.server.close);
+
+    Logger.log('Server closed');
+  }
+
+  private async bootstrapHttpServer(): Promise<void> {
     const app: Server = createExpressServer({
       controllers: [
         `${__dirname}/controllers/*.controller.{js,ts}`,
@@ -36,15 +53,6 @@ export class Application {
     Logger.log(`Server started ${protocol}://${this.serverAddress}`);
   }
 
-  public async close(): Promise<void> {
-    Logger.log('Closing server');
-
-    await util.promisify(this.server.close);
-
-    Logger.log('Server closed');
-    process.exit(0);
-  }
-
   private buildServerAddress(serverAddressInfo: ServerAddressInfo): string {
     return `${serverAddressInfo.address}:${serverAddressInfo.port}`;
   }
@@ -56,5 +64,54 @@ export class Application {
         resolve(server);
       });
     });
+  }
+
+  private async bootstrapSqsQueue(): Promise<void> {
+    const queueUrl: string = config.get('aws.sqs.emailQueue.url');
+    const consumerOptions: ConsumerOptions = this.getSqsConsumerOptions(queueUrl);
+
+    Logger.log(`SQS Consumer starting. URL: ${queueUrl}`);
+
+    const consumer: Consumer = Consumer.create(consumerOptions);
+
+    consumer.on('error', (error: Error) =>
+      Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
+    );
+
+    consumer.on('processing_error', (error: Error) =>
+      Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
+    );
+
+    consumer.on('stopped', () =>
+      Logger.log('SQS Consumer stopped')
+    );
+
+    consumer.start();
+
+    Logger.log('SQS Consumer started');
+  }
+
+  private getSqsConsumerOptions(queueUrl: string): ConsumerOptions {
+    const consumerOptions: ConsumerOptions = {
+      queueUrl,
+      handleMessage: async (sqsMessage: SQSMessage) => {
+        Logger.log(`Received email sqs message: ${JSON.stringify(sqsMessage)}`);
+        const emailMessageHandler: EmailMessageHandler = Container.get(EmailMessageHandler);
+        await emailMessageHandler.handleEmailMessage(sqsMessage);
+      },
+    };
+
+    const awsEndpoint: string = config.get('aws.endpoint');
+
+    if (awsEndpoint) {
+      // Used in tests to make requests to Localstack
+      Logger.log(`Using custom AWS endpoint: ${awsEndpoint}`);
+
+      consumerOptions.sqs = new SQS({
+        endpoint: config.get('aws.endpoint'),
+      });
+    }
+
+    return consumerOptions;
   }
 }

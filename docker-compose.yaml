@@ -11,6 +11,19 @@ services:
       - '8025:8025'
       - '1025:1025'
 
+  localstack:
+    image: 'localstack/localstack-light'
+    ports:
+      - '4566-4597:4566-4597'
+    environment:
+      - SERVICES=sqs,sns
+      - AWS_DEFAULT_REGION=eu-central-1
+      - EDGE_PORT=4566
+      - DEBUG=1
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
   car-service:
     build:
       context: .

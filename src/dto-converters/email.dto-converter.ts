@@ -1,6 +1,9 @@
 import {EmailDto} from '../models/dto/email.dto';
 import {Email} from '../models/common/email';
 import {Service} from 'typedi';
+import {SQSMessage} from 'sqs-consumer';
+import {plainToClass} from 'class-transformer';
+import {ObjectUtils} from '../common/object.utils';
 
 @Service()
 export class EmailDtoConverter {
@@ -12,5 +15,32 @@ export class EmailDtoConverter {
       html: emailDto.html,
       text: emailDto.text,
     };
+  }
+
+  public toDtoFromSqsMessage(sqsMessage: SQSMessage): EmailDto | undefined {
+    if (sqsMessage.Body === undefined) {
+      return undefined;
+    }
+
+    let parsedBody: Record<string, any> | undefined;
+
+    try {
+      parsedBody = JSON.parse(sqsMessage.Body);
+    } catch (error) {
+      return undefined;
+    }
+
+    if (!ObjectUtils.isObject(parsedBody)) {
+      return undefined;
+    }
+
+    const emailDto: EmailDto = plainToClass(EmailDto, parsedBody);
+
+    return plainToClass(EmailDto, {
+      receiverAddress: emailDto.receiverAddress,
+      subject: emailDto.subject,
+      html: emailDto.html,
+      text: emailDto.text,
+    });
   }
 }
