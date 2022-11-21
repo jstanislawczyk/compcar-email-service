@@ -17,16 +17,19 @@ export class Application {
 
   public server: Server;
   public serverAddress: string;
+  public isRunning: boolean = false;
 
   public async bootstrap(): Promise<void> {
     await this.bootstrapHttpServer();
     await this.bootstrapSqsQueue();
+    this.isRunning = true;
   }
 
   public async close(): Promise<void> {
     Logger.log('Closing server');
 
     await util.promisify(this.server.close);
+    this.isRunning = false;
 
     Logger.log('Server closed');
   }

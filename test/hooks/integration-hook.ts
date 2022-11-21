@@ -32,10 +32,9 @@ const createQueue = async (): Promise<void> => {
   };
   const result: CreateQueueResult = await sqs.createQueue(createQueueParams).promise();
 
-  console.log(`Test queue created 1: ${result.QueueUrl}`);
   queueUrl = result.QueueUrl || config.get('aws.sqs.emailQueue.url');
 
-  console.log(`Test queue created 2: ${queueUrl}`);
+  console.log(`Test queue created: ${queueUrl}`);
 };
 
 const deleteQueue = async (): Promise<void> => {
