@@ -7,8 +7,9 @@ on:
     branches: [ master ]
 
 env:
-  AWS_ACCESS_KEY_ID: foobar
-  AWS_SECRET_ACCESS_KEY: foobar
+  # AWS credentials used only for Localstack
+  AWS_ACCESS_KEY_ID: localstackAccessKeyId
+  AWS_SECRET_ACCESS_KEY: localstackSecretAccessKeyId
 
 jobs:
   build:
