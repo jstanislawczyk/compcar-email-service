@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  AWS_ACCESS_KEY_ID: foobar
+  AWS_SECRET_ACCESS_KEY: foobar
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,10 +35,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: Configure test AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-region: us-east-1
     - run: npm ci
     - run: npm run compile
     - run: npm run lint
