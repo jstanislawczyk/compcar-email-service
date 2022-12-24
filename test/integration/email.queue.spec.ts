@@ -58,24 +58,6 @@ describe('EmailQueue', () => {
     });
   });
 
-  // const createQueue = async (): Promise<void> => {
-  //   const createQueueParams: CreateQueueRequest = {
-  //     QueueName: config.get('aws.sqs.emailQueue.name'),
-  //   };
-  //   const result: CreateQueueResult = await sqs.createQueue(createQueueParams).promise();
-  //   queueUrl = result.QueueUrl || config.get('aws.sqs.emailQueue.url');
-  //   console.log(`Test queue created: ${queueUrl}`);
-  // }
-  //
-  // const deleteQueue = async (): Promise<void> => {
-  //   const deleteQueueParams: DeleteQueueRequest = {
-  //     QueueUrl: queueUrl,
-  //   };
-  //
-  //   await sqs.deleteQueue(deleteQueueParams).promise();
-  //   console.log(`Test queue deleted: ${queueUrl}`);
-  // }
-
   const getQueueMessages = async (): Promise<MessageList | undefined> => {
     const receiveMessageRequest: ReceiveMessageRequest = {
       QueueUrl: queueUrl,

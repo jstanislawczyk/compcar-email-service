@@ -1,4 +1,4 @@
-FROM node:14.8.0-alpine
+FROM node:16-alpine
 
 # Environment variables
 ENV NODE_ENV production
@@ -17,5 +17,5 @@ RUN rm -r test
 RUN npm run build:prod
 
 # Expose app
-EXPOSE 4000
+EXPOSE 3002
 CMD npm run start:prod
