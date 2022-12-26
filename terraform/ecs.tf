@@ -1,41 +1,53 @@
 resource "aws_ecs_cluster" "main" {
   name = "${local.environment}-main"
 }
-#
-#resource "aws_ecs_task_definition" "email_service" {
-#  family                   = "${local.environment}-email-service"
-#  requires_compatibilities = ["FARGATE"]
-#  cpu                      = 256
-#  memory                   = 512
-#  network_mode             = "awsvpc"
-#  task_role_arn            = aws_iam_role.email_service_ecs_task_role.arn
-#  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-#
-#  container_definitions = jsonencode([
-#    {
-#      name      = "first"
-#      image     = "service-first"
-#      cpu       = 256
-#      memory    = 512
-#      essential = true
-#      portMappings = [
-#        {
-#          containerPort = 3002
-#          hostPort      = 3002
-#        }
-#      ]
-#    },
-#  ])
-#}
 
-#resource "aws_ecs_service" "email_service" {
-#  name            = "${local.environment}-${local.service}"
-#  cluster         = aws_ecs_cluster.main.id
-#  task_definition = aws_ecs_task_definition.email_service.arn
-#  desired_count   = 1
-#
-#  ordered_placement_strategy {
-#    type  = "binpack"
-#    field = "cpu"
-#  }
-#}
+resource "aws_ecs_task_definition" "email_service" {
+  family                   = "${local.environment}-email-service"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = 256
+  memory                   = 512
+  network_mode             = "awsvpc"
+  task_role_arn            = aws_iam_role.email_service_ecs_task_role.arn
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
+
+  container_definitions = jsonencode([
+    {
+      name         = "${local.environment}-${local.service}"
+      image        = "890769921003.dkr.ecr.${local.region}.amazonaws.com/${local.environment}:nodejs"
+      essential    = true
+      portMappings = [
+        {
+          containerPort = local.email_service_port
+          hostPort      = local.email_service_port
+        }
+      ]
+    },
+  ])
+}
+
+resource "aws_ecs_service" "email_service" {
+  name             = "${local.environment}-${local.service}"
+  cluster          = aws_ecs_cluster.main.id
+  task_definition  = aws_ecs_task_definition.email_service.arn
+  desired_count    = 1
+  launch_type      = "FARGATE"
+
+  network_configuration {
+    security_groups  = [aws_security_group.allow_email_service.id]
+    subnets          = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
+    assign_public_ip = true
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.email_service.arn
+    container_name   = "${local.environment}-${local.service}"
+    container_port   = local.email_service_port
+  }
+}
