@@ -24,7 +24,7 @@ services:
       - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
 
-  car-service:
+  email-service:
     build:
       context: .
       dockerfile: Dockerfile
