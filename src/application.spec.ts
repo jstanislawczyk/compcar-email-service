@@ -45,6 +45,7 @@ describe('Application', () => {
       const expectedServerPort: string = config.get('server.port');
 
       expect(application.server).to.be.eql(serverStub);
+      expect(application.isRunning).to.be.true;
       expect(startServerStub.firstCall.args[1]).to.be.eql(expectedServerUrl);
       expect(startServerStub.firstCall.args[2]).to.be.eql(expectedServerPort);
     });
@@ -56,9 +57,25 @@ describe('Application', () => {
       // Assert
       const expectedSqsUrl: string = config.get('aws.sqs.emailQueue.url');
 
+      expect(application.isRunning).to.be.true;
       expect(sqsConsumerCreateStub).to.be.calledOnce;
       expect(sqsConsumerCreateStub.firstCall.firstArg.queueUrl).to.be.eql(expectedSqsUrl);
       expect(sqsConsumerStub.start).to.be.calledOnce;
+    });
+  });
+
+  describe('close', () => {
+    it('should close app', async () => {
+      // Arrange
+      application.server = serverStub;
+
+      serverStub.close.resolves();
+
+      // Act
+      await application.close();
+
+      // Assert
+      expect(application.isRunning).to.be.false;
     });
   });
 });
