@@ -11,7 +11,6 @@ resource "aws_ecs_task_definition" "email_service" {
   task_role_arn            = aws_iam_role.email_service_ecs_task_role.arn
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
-
   runtime_platform {
     operating_system_family = "LINUX"
     cpu_architecture        = "X86_64"
@@ -20,7 +19,7 @@ resource "aws_ecs_task_definition" "email_service" {
   container_definitions = jsonencode([
     {
       name         = "${local.environment}-${local.service}"
-      image        = "890769921003.dkr.ecr.${local.region}.amazonaws.com/${local.environment}:nodejs"
+      image        = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${local.region}.amazonaws.com/${local.environment}:${local.service}"
       essential    = true
       portMappings = [
         {
@@ -28,6 +27,17 @@ resource "aws_ecs_task_definition" "email_service" {
           hostPort      = local.email_service_port
         }
       ]
+      environment: [
+        { "name": "EMAIL_QUEUE_URL", "value": aws_sqs_queue.emails.id }
+      ]
+      logConfiguration: {
+        logDriver: "awslogs"
+        options: {
+          awslogs-group: "${local.environment}-${local.service}"
+          awslogs-region: local.region
+          awslogs-stream-prefix: "ecs"
+        }
+      }
     },
   ])
 }

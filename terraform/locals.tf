@@ -3,5 +3,5 @@ locals {
   environment = "jstanislawczyk"
   service     = "email-service"
 
-  email_service_port = 8080
+  email_service_port = 3002
 }

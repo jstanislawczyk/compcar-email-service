@@ -1,21 +1,32 @@
-FROM node:16-alpine
+## Stage 1 - Build
+FROM node:16-alpine as builder
 
-# Environment variables
 ENV NODE_ENV production
+ENV SERVER_URL 0.0.0.0
 
-# Create Directory for the Container
 WORKDIR /usr/src/app
 
-# Install nad build
-COPY package*.json .
-RUN npm ci --also=dev
-
-# Build app
-ADD . /usr/src/app
-RUN find . -name "*.spec.ts" -type f -delete
-RUN rm -r test
+# Install app dependencies
+COPY package*.json ./
+COPY tsconfig.json ./
+RUN npm ci
+COPY . .
 RUN npm run build:prod
 
-# Expose app
+## Stage 2 - Run
+FROM node:16-alpine
+
+ENV NODE_ENV production
+ENV SERVER_URL 0.0.0.0
+
+WORKDIR /usr/src/app
+
+# Install service production dependencies
+COPY package*.json ./
+COPY config ./config
+RUN npm ci --production
+COPY --from=builder /usr/src/app/build ./build
+
+# Start service
 EXPOSE 3002
-CMD npm run start:prod
+CMD [ "npm", "run", "start:prod" ]

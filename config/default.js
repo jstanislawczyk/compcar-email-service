@@ -1,8 +1,8 @@
 module.exports = {
     server: {
-        url: Number(process.env.SERVER_URL) || 'localhost',
+        url: process.env.SERVER_URL || 'localhost',
         port: Number(process.env.SERVER_PORT) || 3002,
-        protocol: Number(process.env.SERVER_PROTOCOL) || 'http',
+        protocol: process.env.SERVER_PROTOCOL || 'http',
     },
     common: {
         isDev: process.env.IS_DEV === 'true',

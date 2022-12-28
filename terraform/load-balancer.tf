@@ -10,6 +10,11 @@ resource "aws_lb_target_group" "email_service" {
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
+
+  health_check {
+    path = "/health"
+    port = local.email_service_port
+  }
 }
 
 resource "aws_lb_listener" "email_service_listener" {
