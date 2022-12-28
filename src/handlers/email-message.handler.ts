@@ -1,11 +1,11 @@
 import {Service} from 'typedi';
-import {SQSMessage} from 'sqs-consumer';
 import {EmailDtoConverter} from '../dto-converters/email.dto-converter';
 import {Email} from '../models/common/email';
 import {validateOrReject} from 'class-validator';
 import {Logger} from '../common/logger';
 import {EmailService} from '../services/email.service';
 import {EmailDto} from '../models/dto/email.dto';
+import {Message} from '@aws-sdk/client-sqs';
 
 @Service()
 export class EmailMessageHandler {
@@ -16,13 +16,13 @@ export class EmailMessageHandler {
   ) {
   }
 
-  public async handleEmailMessage(sqsMessage: SQSMessage): Promise<void> {
+  public async handleEmailMessage(sqsMessage: Message): Promise<void> {
     const email: Email = await this.getEmail(sqsMessage);
 
     await this.emailService.sendMail(email);
   }
 
-  private async getEmail(sqsMessage: SQSMessage): Promise<Email> {
+  private async getEmail(sqsMessage: Message): Promise<Email> {
     const emailDto: EmailDto | undefined = this.emailDtoConverter.toDtoFromSqsMessage(sqsMessage);
     const validatedEmailDto: EmailDto = await this.validateEmailDto(emailDto);
 

@@ -8,10 +8,10 @@ import {createExpressServer, useContainer} from 'routing-controllers';
 import {Logger} from './common/logger';
 import {ServerAddressInfo} from './models/common/server-address-info';
 import Container from 'typedi';
-import {Consumer, ConsumerOptions, SQSMessage} from 'sqs-consumer';
+import {Consumer, ConsumerOptions} from 'sqs-consumer';
 import {LoggerLevel} from './models/enums/logger-level';
 import {EmailMessageHandler} from './handlers/email-message.handler';
-import {SQS} from 'aws-sdk';
+import {Message, SQSClient} from '@aws-sdk/client-sqs';
 
 export class Application {
 
@@ -97,7 +97,7 @@ export class Application {
   private getSqsConsumerOptions(queueUrl: string): ConsumerOptions {
     const consumerOptions: ConsumerOptions = {
       queueUrl,
-      handleMessage: async (sqsMessage: SQSMessage) => {
+      handleMessage: async (sqsMessage: Message) => {
         Logger.log(`Received email sqs message: ${JSON.stringify(sqsMessage)}`);
         const emailMessageHandler: EmailMessageHandler = Container.get(EmailMessageHandler);
         await emailMessageHandler.handleEmailMessage(sqsMessage);
@@ -110,7 +110,7 @@ export class Application {
       // Used in tests to make requests to Localstack
       Logger.log(`Using custom AWS endpoint: ${awsEndpoint}`);
 
-      consumerOptions.sqs = new SQS({
+      consumerOptions.sqs = new SQSClient({
         endpoint: config.get('aws.endpoint'),
       });
     }

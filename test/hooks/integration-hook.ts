@@ -1,18 +1,21 @@
 import {Application} from '../../src/application';
-import AWS, {SQS} from 'aws-sdk';
 import config from 'config';
-import {CreateQueueRequest, CreateQueueResult, DeleteQueueRequest} from 'aws-sdk/clients/sqs';
+import {
+  CreateQueueCommand,
+  CreateQueueCommandInput, CreateQueueCommandOutput,
+  DeleteQueueCommand,
+  DeleteQueueCommandInput,
+  SQSClient,
+} from '@aws-sdk/client-sqs';
 
 export let application: Application;
-export let sqs: SQS;
+export let sqsClient: SQSClient;
 export let queueUrl: string;
 
 before(async () => {
-  AWS.config.update({
-    region: config.get('aws.region'),
-  });
-  sqs = new SQS({
+  sqsClient = new SQSClient({
     endpoint: config.get('aws.endpoint'),
+    region: config.get('aws.region'),
   });
 
   await createQueue();
@@ -27,21 +30,23 @@ after(async () => {
 });
 
 const createQueue = async (): Promise<void> => {
-  const createQueueParams: CreateQueueRequest = {
+  const createQueueInput: CreateQueueCommandInput = {
     QueueName: config.get('aws.sqs.emailQueue.name'),
   };
-  const result: CreateQueueResult = await sqs.createQueue(createQueueParams).promise();
+  const createQueueCommand: CreateQueueCommand = new CreateQueueCommand(createQueueInput);
+  const createQueueCommandOutput: CreateQueueCommandOutput = await sqsClient.send(createQueueCommand);
 
-  queueUrl = result.QueueUrl || config.get('aws.sqs.emailQueue.url');
+  queueUrl = createQueueCommandOutput.QueueUrl || config.get('aws.sqs.emailQueue.url');
 
   console.log(`Test queue created: ${queueUrl}`);
 };
 
 const deleteQueue = async (): Promise<void> => {
-  const deleteQueueParams: DeleteQueueRequest = {
+  const deleteQueueInput: DeleteQueueCommandInput = {
     QueueUrl: queueUrl,
   };
-  await sqs.deleteQueue(deleteQueueParams).promise();
+  const deleteQueueCommand: DeleteQueueCommand = new DeleteQueueCommand(deleteQueueInput);
+  await sqsClient.send(deleteQueueCommand);
 
   console.log(`Test queue deleted: ${queueUrl}`);
 };

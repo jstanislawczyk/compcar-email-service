@@ -6,8 +6,8 @@ import {EmailDto} from '../models/dto/email.dto';
 import {EmailDtoBuilder} from '../../test/utils/builders/email-dto.builder';
 import {Email} from '../models/common/email';
 import {EmailBuilder} from '../../test/utils/builders/email.builder';
+import {Message} from '@aws-sdk/client-sqs';
 import {expect, use} from 'chai';
-import {SQSMessage} from 'sqs-consumer';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 
@@ -39,7 +39,7 @@ describe('EmailMessageHandler', () => {
       // Arrange
       const emailDto: EmailDto = new EmailDtoBuilder().build();
       const email: Email = new EmailBuilder().build();
-      const sqsMessage: SQSMessage = {
+      const sqsMessage: Message = {
         Body: JSON.stringify(emailDto),
       };
 
@@ -60,7 +60,7 @@ describe('EmailMessageHandler', () => {
       // Arrange
       const emailDto: EmailDto = new EmailDtoBuilder().build();
       const email: Email = new EmailBuilder().build();
-      const sqsMessage: SQSMessage = {
+      const sqsMessage: Message = {
         Body: JSON.stringify(emailDto),
       };
       const errorMessage: string = 'EmailService error';

@@ -3,10 +3,16 @@ import {EmailDto} from '../../src/models/dto/email.dto';
 import {EmailDtoBuilder} from '../utils/builders/email-dto.builder';
 import axios from 'axios';
 import config from 'config';
-import { MessageList, ReceiveMessageRequest, ReceiveMessageResult, SendMessageRequest } from 'aws-sdk/clients/sqs';
 import {expect} from 'chai';
 import {waitTime} from '../utils/common/time.utils';
-import {queueUrl, sqs} from '../hooks/integration-hook';
+import {queueUrl, sqsClient} from '../hooks/integration-hook';
+import {
+  Message,
+  ReceiveMessageCommand,
+  ReceiveMessageCommandInput, ReceiveMessageCommandOutput,
+  SendMessageCommand,
+  SendMessageCommandInput,
+} from '@aws-sdk/client-sqs';
 
 describe('EmailQueue', () => {
 
@@ -33,13 +39,14 @@ describe('EmailQueue', () => {
     it('using SQS queue', async () => {
       // Arrange
       const emailDto: EmailDto = new EmailDtoBuilder().build();
-      const sendMessageRequest: SendMessageRequest = {
+      const sendMessageInput: SendMessageCommandInput = {
         QueueUrl: queueUrl,
         MessageBody: JSON.stringify(emailDto),
       };
+      const sendMessageCommand: SendMessageCommand = new SendMessageCommand(sendMessageInput);
 
       // Act
-      await sqs.sendMessage(sendMessageRequest).promise();
+      await sqsClient.send(sendMessageCommand);
 
       // Assert
       const mailhogResponse: Record<string, any> = await waitForEmails();
@@ -53,18 +60,19 @@ describe('EmailQueue', () => {
         .a('string')
         .and.include(emailDto.html);
 
-      const queueMessages: MessageList | undefined = await getQueueMessages();
+      const queueMessages: Message[] | undefined = await getQueueMessages();
       expect(queueMessages).to.be.undefined;
     });
   });
 
-  const getQueueMessages = async (): Promise<MessageList | undefined> => {
-    const receiveMessageRequest: ReceiveMessageRequest = {
+  const getQueueMessages = async (): Promise<Message[] | undefined> => {
+    const receiveMessageInput: ReceiveMessageCommandInput = {
       QueueUrl: queueUrl,
     };
-    const receiveMessageResult: ReceiveMessageResult = await sqs.receiveMessage(receiveMessageRequest).promise();
+    const receiveMessageCommand: ReceiveMessageCommand = new ReceiveMessageCommand(receiveMessageInput);
+    const receiveMessageOutput: ReceiveMessageCommandOutput = await sqsClient.send(receiveMessageCommand);
 
-    return receiveMessageResult.Messages;
+    return receiveMessageOutput.Messages;
   };
 
   const waitForEmails = async (): Promise<Record<string, any>> => {
