@@ -103,7 +103,6 @@ export class Application {
         await emailMessageHandler.handleEmailMessage(sqsMessage);
       },
     };
-
     const awsEndpoint: string = config.get('aws.endpoint');
 
     if (awsEndpoint) {
