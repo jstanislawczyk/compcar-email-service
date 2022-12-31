@@ -78,8 +78,8 @@ export class Application {
     const consumer: Consumer = Consumer.create(consumerOptions);
 
     consumer.on('error', (error: Error) => {
-      Logger.log(`Message: ${error.message}`, LoggerLevel.ERROR)
-      Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
+      Logger.log(`Message: ${error.message}`, LoggerLevel.ERROR);
+      Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR);
     });
 
     consumer.on('processing_error', (error: Error) =>
