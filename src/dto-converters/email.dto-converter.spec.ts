@@ -3,7 +3,7 @@ import {Email} from '../models/common/email';
 import {EmailDto} from '../models/dto/email.dto';
 import {expect} from 'chai';
 import {EmailDtoBuilder} from '../../test/utils/builders/email-dto.builder';
-import {SQSMessage} from 'sqs-consumer';
+import {Message} from '@aws-sdk/client-sqs';
 
 describe('EmailDtoConverter', () => {
 
@@ -35,7 +35,7 @@ describe('EmailDtoConverter', () => {
     it('should transform to email model', () => {
       // Arrange
       const emailDto: EmailDto = new EmailDtoBuilder().build();
-      const sqsMessage: SQSMessage = {
+      const sqsMessage: Message = {
         Body: JSON.stringify(emailDto),
       };
 
@@ -54,7 +54,7 @@ describe('EmailDtoConverter', () => {
     describe('should transform to email model with default undefined properties', () => {
       it('for object different than EmailDto', () => {
         // Arrange
-        const sqsMessage: SQSMessage = {
+        const sqsMessage: Message = {
           Body: JSON.stringify({
             test: 1,
           }),
@@ -74,7 +74,7 @@ describe('EmailDtoConverter', () => {
 
       it('for empty object', () => {
         // Arrange
-        const sqsMessage: SQSMessage = {
+        const sqsMessage: Message = {
           Body: JSON.stringify({}),
         };
 
@@ -102,7 +102,7 @@ describe('EmailDtoConverter', () => {
 
       it('is number', () => {
         // Arrange
-        const sqsMessage: SQSMessage = {
+        const sqsMessage: Message = {
           Body: '123',
         };
 
@@ -115,7 +115,7 @@ describe('EmailDtoConverter', () => {
 
       it('is string', () => {
         // Arrange
-        const sqsMessage: SQSMessage = {
+        const sqsMessage: Message = {
           Body: 'Test',
         };
 
@@ -128,7 +128,7 @@ describe('EmailDtoConverter', () => {
 
       it('is empty string', () => {
         // Arrange
-        const sqsMessage: SQSMessage = {
+        const sqsMessage: Message = {
           Body: 'Test',
         };
 
@@ -141,7 +141,7 @@ describe('EmailDtoConverter', () => {
 
       it('if sqs message body is empty array', () => {
         // Arrange
-        const sqsMessage: SQSMessage = {
+        const sqsMessage: Message = {
           Body: JSON.stringify([]),
         };
 
@@ -155,7 +155,7 @@ describe('EmailDtoConverter', () => {
       it('if sqs message body is array of emails', () => {
         // Arrange
         const emailDto: EmailDto = new EmailDtoBuilder().build();
-        const sqsMessage: SQSMessage = {
+        const sqsMessage: Message = {
           Body: JSON.stringify([emailDto]),
         };
 

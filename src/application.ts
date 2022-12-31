@@ -8,10 +8,10 @@ import {createExpressServer, useContainer} from 'routing-controllers';
 import {Logger} from './common/logger';
 import {ServerAddressInfo} from './models/common/server-address-info';
 import Container from 'typedi';
-import {Consumer, ConsumerOptions, SQSMessage} from 'sqs-consumer';
+import {Consumer, ConsumerOptions} from 'sqs-consumer';
 import {LoggerLevel} from './models/enums/logger-level';
 import {EmailMessageHandler} from './handlers/email-message.handler';
-import {SQS} from 'aws-sdk';
+import {Message, SQSClient} from '@aws-sdk/client-sqs';
 
 export class Application {
 
@@ -78,11 +78,11 @@ export class Application {
     const consumer: Consumer = Consumer.create(consumerOptions);
 
     consumer.on('error', (error: Error) =>
-      Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
+      Logger.log(`SQS Consumer error message: ${error.message}`, LoggerLevel.ERROR)
     );
 
     consumer.on('processing_error', (error: Error) =>
-      Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
+      Logger.log(`SQS Consumer processing error message: ${error.message}`, LoggerLevel.ERROR)
     );
 
     consumer.on('stopped', () =>
@@ -97,21 +97,21 @@ export class Application {
   private getSqsConsumerOptions(queueUrl: string): ConsumerOptions {
     const consumerOptions: ConsumerOptions = {
       queueUrl,
-      handleMessage: async (sqsMessage: SQSMessage) => {
+      handleMessage: async (sqsMessage: Message) => {
         Logger.log(`Received email sqs message: ${JSON.stringify(sqsMessage)}`);
         const emailMessageHandler: EmailMessageHandler = Container.get(EmailMessageHandler);
         await emailMessageHandler.handleEmailMessage(sqsMessage);
       },
     };
-
     const awsEndpoint: string = config.get('aws.endpoint');
 
     if (awsEndpoint) {
       // Used in tests to make requests to Localstack
       Logger.log(`Using custom AWS endpoint: ${awsEndpoint}`);
 
-      consumerOptions.sqs = new SQS({
+      consumerOptions.sqs = new SQSClient({
         endpoint: config.get('aws.endpoint'),
+        region: config.get('aws.region'),
       });
     }
 

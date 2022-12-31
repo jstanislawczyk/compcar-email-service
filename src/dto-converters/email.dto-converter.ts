@@ -1,9 +1,9 @@
 import {EmailDto} from '../models/dto/email.dto';
 import {Email} from '../models/common/email';
 import {Service} from 'typedi';
-import {SQSMessage} from 'sqs-consumer';
 import {plainToClass} from 'class-transformer';
 import {ObjectUtils} from '../common/object.utils';
+import {Message} from '@aws-sdk/client-sqs';
 
 @Service()
 export class EmailDtoConverter {
@@ -17,7 +17,7 @@ export class EmailDtoConverter {
     };
   }
 
-  public toDtoFromSqsMessage(sqsMessage: SQSMessage): EmailDto | undefined {
+  public toDtoFromSqsMessage(sqsMessage: Message): EmailDto | undefined {
     if (sqsMessage.Body === undefined) {
       return undefined;
     }
