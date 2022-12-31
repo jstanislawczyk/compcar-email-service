@@ -82,7 +82,7 @@ export class Application {
     );
 
     consumer.on('processing_error', (error: Error) =>
-      Logger.log(`SQS Consumer error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
+      Logger.log(`SQS Consumer processing error: ${JSON.stringify(error)}`, LoggerLevel.ERROR)
     );
 
     consumer.on('stopped', () =>
