@@ -5,7 +5,7 @@ resource "aws_lb" "app" {
 }
 
 resource "aws_lb_target_group" "email_service" {
-  name        = "${local.environment}-email-service"
+  name        = "${local.environment}-${local.service}"
   port        = local.email_service_port
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
@@ -17,6 +17,19 @@ resource "aws_lb_target_group" "email_service" {
   }
 }
 
+resource "aws_lb_target_group" "mailhog_http" {
+  name        = "${local.environment}-mailhog-http"
+  port        = local.mailhog_port_http
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "ip"
+
+  health_check {
+    path = "/"
+    port = local.mailhog_port_http
+  }
+}
+
 resource "aws_lb_listener" "email_service_listener" {
   load_balancer_arn = aws_lb.app.id
   port              = local.email_service_port
@@ -24,6 +37,17 @@ resource "aws_lb_listener" "email_service_listener" {
 
   default_action {
     target_group_arn = aws_lb_target_group.email_service.id
+    type             = "forward"
+  }
+}
+
+resource "aws_lb_listener" "mailhog_listener_http" {
+  load_balancer_arn = aws_lb.app.id
+  port              = local.mailhog_port_http
+  protocol          = "HTTP"
+
+  default_action {
+    target_group_arn = aws_lb_target_group.mailhog_http.id
     type             = "forward"
   }
 }
